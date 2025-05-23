@@ -1,7 +1,7 @@
 from django.db import models
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser , BaseUserManager
-from django.core.validators import RegexValidator
+# from django.core.validators import RegexValidator
 from django.contrib.auth.hashers import make_password
 import logging
 
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserManager(BaseUserManager):
-    def create_user(self , email , firstname , lastname , phone_number ,password=None) :   #phone = None 
+    def create_user(self , email , phone_number ,password=None) :   #phone = None , firstname , lastname 
         """
         Creates and saves a User with the given email, 
         data of birth and password
@@ -19,9 +19,9 @@ class UserManager(BaseUserManager):
         
         user = self.model(
             email = self.normalize_email(email),
-            firstname = firstname , 
-            lastname = lastname,
-            phone_number = phone_number 
+            # firstname = firstname , 
+            # lastname = lastname,
+            # phone_number = phone_number 
         )
         user.password = make_password(password)
         user.save(using=self._db)
@@ -38,9 +38,9 @@ class UserManager(BaseUserManager):
         user = self.create_user(
             email=email,
             password=password,
-            firstname = "admin" , 
-            lastname = "adminzadeh",
-            phone_number="+989999999999" 
+            # firstname = "admin" , 
+            # lastname = "adminzadeh",
+            # phone_number="+989999999999" 
         )
         user.is_admin = True
         user.is_superuser = True
@@ -81,18 +81,18 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
-    phone_number_regex = r'^(?:\+98|0)(?:\s?)9[0-9]{9}$'
-    phone_number_validator = RegexValidator(
-        regex=phone_number_regex,
-        message="Phone number must be in a valid Iranian format."
-    )
+    # phone_number_regex = r'^(?:\+98|0)(?:\s?)9[0-9]{9}$'
+    # phone_number_validator = RegexValidator(
+    #     regex=phone_number_regex,
+    #     message="Phone number must be in a valid Iranian format."
+    # )
 
-    phone_number = models.CharField(
-        max_length=15,  # Adjust the length as per your requirement
-        validators=[phone_number_validator],
-        blank=True,
-        null=True
-    )
+    # phone_number = models.CharField(
+    #     max_length=15,  # Adjust the length as per your requirement
+    #     validators=[phone_number_validator],
+    #     blank=True,
+    #     null=True
+    # )
     
     role = models.CharField( max_length=255, choices=CHOICES , default=TYPE_USER )
     is_email_verified = models.BooleanField(default=False)

@@ -12,7 +12,7 @@ from rest_framework import serializers
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["email" ,"firstname" ,"lastname" , "phone_number" , "id" , "role"]
+        fields = ["email" , "id" , "role"] # "firstname" ,"lastname" , "phone_number"
 
     def validate(self, attrs):
         return super().validate(attrs)
