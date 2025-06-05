@@ -27,18 +27,25 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'PolarisDB',
-        'USER': 'postgres',
-        'PASSWORD': 'Hgbr@@5391',
-        'HOST': 'postgreSQL',  # Default for production
-        'PORT': '5432',
-        'DISABLE_SERVER_SIDE_CURSORS': True,
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'PolarisDB',
+#         'USER': 'postgres',
+#         'PASSWORD': 'Hgbr@@5391',
+#         'HOST': 'postgreSQL',  # Default for production
+#         'PORT': '5432',
+#         'DISABLE_SERVER_SIDE_CURSORS': True,
+#     }
+# }
 
 # Application definition
 
@@ -52,7 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework_simplejwt',
     "rest_framework",
-    "rest_framework_swagger",
+    # "rest_framework_swagger",
     "rest_framework_simplejwt.token_blacklist",
     'corsheaders',
     "drf_yasg",
@@ -196,6 +203,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = 'authentication.User'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -234,8 +242,7 @@ LOGGING = {
             'propagate': False,
         } for logger_name in
         ('django', 'django.request', 'django.db.backends', 'django.template', 
-         'accounts', 'counseling', 'Profile', 'reservation', 'TherapyTests', 
-         'Rating', 'Doctorpanel', 'urllib3', 'asyncio')
+         'authentication' , 'urllib3', 'asyncio')
     },
     'root': {
         'level': 'DEBUG',
