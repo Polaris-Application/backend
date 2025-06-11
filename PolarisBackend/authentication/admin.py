@@ -11,7 +11,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'phone_number' , 'role')
+        fields = ('phone_number' , 'role')
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -32,35 +32,35 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'is_active', 'is_admin', 'phone_number', 'role')
+        fields = ('password', 'is_active', 'is_admin', 'phone_number', 'role')
 
     def clean_password(self):
         return self.initial["password"]
+
 
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('username', 'is_admin', 'is_active', 'phone_number', 'role')
+    list_display = ('is_admin', 'is_active', 'phone_number', 'role')
     list_filter = ('is_admin', 'role')
     
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('phone_number', 'role')}),
+        (None, {'fields': ('phone_number', 'password')}),  # Changed 'username' to 'phone_number'
+        ('Personal info', {'fields': ('role',)}),  # Kept 'role' only, no need for 'username'
         ('Permissions', {'fields': ('is_admin', 'is_active')}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'phone_number', 'role', 'password1', 'password2', 'is_active'),
+            'fields': ('phone_number', 'role', 'password1', 'password2', 'is_active'),
         }),
     )
 
-    search_fields = ('username', 'phone_number')
-    ordering = ('username',)
+    search_fields = ('phone_number',)  # Changed 'username' to 'phone_number'
+    ordering = ('phone_number',)  # Changed 'username' to 'phone_number'
     filter_horizontal = ()
-
     
 
 # class UserAdmin(BaseUserAdmin):

@@ -16,14 +16,14 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'phone_number', 'password1', 'password2')
+        fields = ('phone_number', 'password1', 'password2')
 
     def validate_username(self, value):
         user_qs = User.objects.filter(username__iexact=value)
         if user_qs.exists():
             user = user_qs.first()
             if user.phone_number != self.initial_data.get('phone_number'):
-                raise serializers.ValidationError("Username already exists.")
+                raise serializers.ValidationError("phone number already exists.")
         return str.lower(value)
 
     def validate(self, data):
@@ -32,13 +32,12 @@ class SignUpSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        username = validated_data["username"]
         phone_number = validated_data["phone_number"]
         password = validated_data["password1"]
-        return User.objects.create_user(username=username, phone_number=phone_number, password=password)
+        return User.objects.create_user(phone_number=phone_number, password=password)
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField(label="Username")
+    phone_number = serializers.CharField(label="Phone Number")  
     password = serializers.CharField(
         label="Password",
         style={"input_type": "password"},
@@ -47,14 +46,14 @@ class LoginSerializer(serializers.Serializer):
     token = serializers.CharField(label="Token", read_only=True)
 
     def validate(self, attrs):
-        username = attrs.get('username')
+        phone_number = attrs.get('phone_number')
         password = attrs.get('password')
 
-        if username and password:
+        if phone_number and password:
             try:
-                user = User.objects.get(username__iexact=username)
+                user = User.objects.get(phone_number=phone_number) 
             except User.DoesNotExist:
-                raise serializers.ValidationError({"username": "User does not exist."})
+                raise serializers.ValidationError({"phone_number": "User does not exist."})
             
             if not user.check_password(password):
                 raise serializers.ValidationError({"password": "Incorrect password."})
@@ -65,13 +64,12 @@ class LoginSerializer(serializers.Serializer):
             attrs['user'] = user
             return attrs
         else:
-            raise serializers.ValidationError("Must include 'username' and 'password'.")
-
+            raise serializers.ValidationError("Must include 'phone_number' and 'password'.")
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username" , "phone_number", "id" , "role"] 
+        fields = ["phone_number", "id" , "role"] 
     def validate(self, attrs):
         return super().validate(attrs)
 
