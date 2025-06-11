@@ -7,50 +7,49 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class UserManager(BaseUserManager):
-    def create_user(self , username , phone_number ,password=None) :   #phone = None , firstname , lastname 
+    def create_user(self, phone_number, password=None):
         """
-        Creates and saves a User with the given username, 
-        data of birth and password
+        Creates and saves a User with the given phone number and password.
         """
-        if not username: 
-            raise ValueError('User must have username')
+        if not phone_number:
+            raise ValueError('User must have a phone number')
         
-        user = self.model(
-            username = username,
-            phone_number = phone_number 
-        )
+        user = self.model(phone_number=phone_number)
+        
+        # Ensure password is hashed
         user.password = make_password(password)
         user.save(using=self._db)
         return user
-    
-    def get_queryset(self) -> models.QuerySet:
-        return super().get_queryset()
-    
-    def create_superuser(self , username ,password=None):
+
+    def create_superuser(self, phone_number, password=None):
         """
-        Creates and saves a superuser with the given username, birthdat
-        and password.
+        Creates and saves a superuser with the given phone number and password.
         """
         user = self.create_user(
-            username=username,
-            password=password,
-            phone_number="09999999999" 
+            phone_number=phone_number,
+            password=password
         )
         user.is_admin = True
         user.is_superuser = True
         user.is_staff = True
         user.is_active = True
-        user.role = User.TYPE_ADMIN
+        user.role = User.TYPE_ADMIN 
         user.save(using=self._db)
         return user
 
-    def save(self, *args, **kwargs):
-        self.password = make_password(self.password)
+    def get_by_natural_key(self, phone_number):
+        """
+        Retrieves a user based on the natural key, which is phone_number.
+        """
+        return self.get(phone_number=phone_number)
 
-    def get_by_natural_key(self, username):
-        return self.get(username=username)
+    def get_queryset(self):
+        """
+        Returns the queryset of users.
+        """
+        return super().get_queryset()
+
 
 class User(AbstractBaseUser):
     TYPE_USER = "user"
@@ -63,15 +62,6 @@ class User(AbstractBaseUser):
         (TYPE_ADMIN , "Admin"),
     )
     
-    username = models.CharField(
-        max_length=255,
-        unique=True,
-        blank=False,
-        null=False
-    )
-    USERNAME_FIELD = 'username'
-
-    
     objects = UserManager()
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -81,12 +71,12 @@ class User(AbstractBaseUser):
         regex=phone_number_regex,
         message="Phone number must be in a valid Iranian format."
     )
+    USERNAME_FIELD = 'phone_number'
 
     phone_number = models.CharField(
-        max_length=11, 
+        max_length=13, 
         validators=[phone_number_validator],
-        blank=True,
-        null=True
+        unique=True,
     )
     
     role = models.CharField( max_length=255, choices=CHOICES , default=TYPE_USER )
@@ -97,7 +87,7 @@ class User(AbstractBaseUser):
         return self.role
     
     def __str__(self):
-        return self.username
+        return self.phone_number
 
     def has_perm(self , perm , obj=None ):
         "Does the user have a specific permisision?"

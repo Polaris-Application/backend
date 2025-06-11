@@ -26,18 +26,14 @@ class SignUpView(CreateAPIView):
         logger.warning(validated_data)
 
         role = User.TYPE_USER
-        # Create user using manager
         user = User.objects.create_user(
-            username=validated_data["username"],
             phone_number=validated_data["phone_number"],
             password=validated_data["password1"]
         )
 
         user.role = role
         user.save()
-
         token = self.generate_verification_token(user)
-
         user_data = {
             "user": UserSerializer(user).data,
             "message": "User created successfully.",
@@ -53,7 +49,6 @@ class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
@@ -78,8 +73,7 @@ class RetrieveUserData(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
     def get(self, request):
-        username = request.query_params.get("username")
-        
+        username = request.query_params.get("phone_number")
         if not username:
             return Response(
                 {"message": "Username is required in query parameters."},
@@ -103,7 +97,7 @@ class RetrieveUserData(GenericAPIView):
         except User.DoesNotExist:
             return None
 
-
+ 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -127,6 +121,7 @@ class LogoutView(APIView):
             response.delete_cookie("refresh_token")
             response.delete_cookie("access_token")
             response.cookies.pop("refresh_token", None)
+                            
             response.cookies.pop("access_token", None)
             return response
 
