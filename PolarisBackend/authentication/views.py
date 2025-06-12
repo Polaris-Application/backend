@@ -73,14 +73,14 @@ class RetrieveUserData(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
     def get(self, request):
-        username = request.query_params.get("phone_number")
-        if not username:
+        phone_number = request.query_params.get("phone_number")
+        if not phone_number:
             return Response(
-                {"message": "Username is required in query parameters."},
+                {"message": "phone_number is required in query parameters."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = self.get_user_by_username(username)
+        user = self.get_user_by_phone_number(phone_number)
 
         if user is None:
             return Response(
@@ -91,16 +91,15 @@ class RetrieveUserData(GenericAPIView):
         data = {"user": UserSerializer(user).data}
         return Response(data=data, status=status.HTTP_200_OK)
     
-    def get_user_by_username(self, username: str):
+    def get_user_by_phone_number(self, phone_number: str):
         try:
-            return User.objects.get(username__iexact=username)
+            return User.objects.get(phone_number__iexact=phone_number)
         except User.DoesNotExist:
             return None
 
  
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
-    
     def get(self, request):
         if not request.user.is_authenticated:
             return Response(
@@ -120,8 +119,7 @@ class LogoutView(APIView):
             )
             response.delete_cookie("refresh_token")
             response.delete_cookie("access_token")
-            response.cookies.pop("refresh_token", None)
-                            
+            response.cookies.pop("refresh_token", None)                            
             response.cookies.pop("access_token", None)
             return response
 

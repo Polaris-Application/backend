@@ -29,9 +29,11 @@ schema_view = get_schema_view(
    public=True,
    permission_classes=[permissions.AllowAny],
 )
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('authentication/' , include('authentication.urls')),
+    path('mobile/' , include('mobile_facilities.urls')),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
