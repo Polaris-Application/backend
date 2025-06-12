@@ -31,27 +31,22 @@ class UserLocationDataCreateView(views.APIView):
             return Response({"message": "User location data does not exist."}, status=404)
     
 
-class PowerUserLocationDataListView(APIView):
+class UserLocationDataListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        min_power = request.query_params.get('min')
-        max_power = request.query_params.get('max')
+        min_power = request.query_params.get('pmin')
+        max_power = request.query_params.get('pmax')
+
+        min_quality = request.query_params.get('qmin')
+        max_quality = request.query_params.get('qmax')
 
         queryset = UserLocationData.objects.filter(user=request.user)
+
         if min_power:
             queryset = queryset.filter(power__gte=min_power)
         if max_power:
             queryset = queryset.filter(power__lte=max_power)
-
-        serializer = UserLocationDataGetSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-class QualityUserLocationDataListView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-        min_quality = request.query_params.get('min')
-        max_quality = request.query_params.get('max')
         queryset = UserLocationData.objects.filter(user=request.user)
         if min_quality:
             queryset = queryset.filter(quality__gte=min_quality)
@@ -59,3 +54,4 @@ class QualityUserLocationDataListView(APIView):
             queryset = queryset.filter(quality__lte=max_quality)
         serializer = UserLocationDataGetSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+

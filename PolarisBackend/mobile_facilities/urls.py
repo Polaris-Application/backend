@@ -1,8 +1,7 @@
 from django.urls import path
-from .views import UserLocationDataCreateView, PowerUserLocationDataListView, QualityUserLocationDataListView
+from .views import UserLocationDataCreateView, UserLocationDataListView
 
 urlpatterns = [
     path('location-data/', UserLocationDataCreateView.as_view(), name='location-data'),
-    path('power-location-data/',PowerUserLocationDataListView.as_view(), name='power-location-data' ),
-    path('quality-location-data/',QualityUserLocationDataListView.as_view(), name='quality-location-data' ),
+    path('list-location-data/',UserLocationDataListView.as_view(), name='power-location-data' ),
 ]
