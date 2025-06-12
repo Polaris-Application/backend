@@ -4,8 +4,8 @@ from django.urls import path
 
 urlpatterns = [
     path('signup/' , SignUpView.as_view() , name='signup' ) ,
-    path('Login/',LoginView.as_view(),name='Login'),
-    path('Logout/',LogoutView.as_view(),name='Logout'),
+    path('login/',LoginView.as_view(),name='Login'),
+    path('logout/',LogoutView.as_view(),name='Logout'),
     path('get_user/' , RetrieveUserData.as_view() , name='get_user'),
     # path('activation_confirm/<str:token>/', ActivationConfirmView.as_view(), name='activation_confirm'),
     # path('activation_resend/', ActivationResend.as_view(), name='activation_resend'),
