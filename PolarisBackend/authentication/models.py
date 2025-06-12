@@ -55,7 +55,6 @@ class User(AbstractBaseUser):
     TYPE_USER = "user"
     TYPE_ADMIN = "admin"
     TYPE_PLMN = "plmn_admin"
-
     CHOICES = (
         (TYPE_USER , "User") , 
         (TYPE_PLMN, "plmn_admin"),
