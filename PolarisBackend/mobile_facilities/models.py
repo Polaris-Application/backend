@@ -41,8 +41,6 @@ class UserLocationData(models.Model):
         # Fallback to RSSI for 2G/3G/4G
         elif self.rssi is not None:
             return self.rssi
-        
-        # Fallback to RSCP for 3G
         elif self.rscp is not None:
             return self.rscp
         
