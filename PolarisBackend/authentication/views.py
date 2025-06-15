@@ -68,7 +68,6 @@ class LoginView(TokenObtainPairView):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-
 class RetrieveUserData(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer

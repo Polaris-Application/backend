@@ -9,6 +9,11 @@ class UserLocationDataSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SignalStrengthSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserLocationData
+        fields = ['rsrp', 'rsrq']
+
 class UserLocationDataGetSerializer(serializers.ModelSerializer):
     tac_lac = serializers.SerializerMethodField()
     # Power = serializers.SerializerMethodField()

@@ -5,6 +5,8 @@ from authentication.models import User
 from .serializers import UserMobileTestSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from django.db.models.functions import TruncMinute
+from django.db.models import Max
 
 class UserMobileTestsView(views.APIView):
     permission_classes = [IsAuthenticated]
@@ -36,4 +38,26 @@ class UserMobileTestsView(views.APIView):
             domains_string = ",".join(distinct_domains)
             return Response(domains_string, status=status.HTTP_200_OK)
 
-        
+
+class MaxPingOverTimeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        interval_minutes = int(request.query_params.get('interval', 5))
+        user = request.user
+
+        # Truncate to 5-minute bins
+        trunc_func = TruncMinute('timestamp', precision=interval_minutes)
+
+        queryset = (
+            UserMobileTests.objects
+            .filter(user=user, test_type='ping')
+            .annotate(time_bin=trunc_func)
+            .values('time_bin')
+            .annotate(max_delay=Max('result'))
+            .order_by('time_bin')
+        )
+        data = [{"timestamp": item["time_bin"], "max_delay": item["max_delay"]} for item in queryset]
+        return Response(data,status=status.HTTP_200_OK)
+    
+
