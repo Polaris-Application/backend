@@ -14,10 +14,7 @@ class UserManager(BaseUserManager):
         """
         if not phone_number:
             raise ValueError('User must have a phone number')
-        
         user = self.model(phone_number=phone_number)
-        
-        # Ensure password is hashed
         user.password = make_password(password)
         user.save(using=self._db)
         return user
@@ -56,9 +53,9 @@ class User(AbstractBaseUser):
     TYPE_ADMIN = "admin"
     TYPE_PLMN = "plmn_admin"
     CHOICES = (
-        (TYPE_USER , "User") , 
+        (TYPE_USER , "user") , 
         (TYPE_PLMN, "plmn_admin"),
-        (TYPE_ADMIN , "Admin"),
+        (TYPE_ADMIN , "admin"),
     )
     
     objects = UserManager()
@@ -77,7 +74,7 @@ class User(AbstractBaseUser):
         validators=[phone_number_validator],
         unique=True,
     )
-    
+    plmn = models.IntegerField(null=True, blank=True)
     role = models.CharField( max_length=255, choices=CHOICES , default=TYPE_USER )
     is_staff = models.BooleanField(default=False)  
     is_superuser = models.BooleanField(default=False)  
