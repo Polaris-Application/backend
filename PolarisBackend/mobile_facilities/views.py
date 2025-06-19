@@ -19,7 +19,8 @@ class UserLocationDataCreateView(views.APIView):
             user = request.user  
             serializer.save(user=user) 
             return Response({'status': 'Data Created'}, status=201)
-        return Response(serializer.errors, status=400)
+        print(f"++++++++++++++++++++++++++++++++++++++++ {serializer.errors}" )
+        return Response(serializer.errors , status=400)
     
     def get(self, request):
         user = request.user

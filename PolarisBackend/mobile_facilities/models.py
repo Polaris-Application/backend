@@ -2,30 +2,29 @@ from django.db import models
 from authentication.models import User # Assuming User model is from django.contrib.auth
 
 class UserLocationData(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="location_data")
-    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="location_data")  
     # Location details
-    timestamp = models.DateTimeField()  # Time of data collection
-    latitude = models.DecimalField(max_digits=9, decimal_places=6)  # Latitude (e.g., 35.470540)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6)  # Longitude (e.g., 50.983306)
+    timestamp = models.DateTimeField(null=True, blank=True)  # Time of data collection
+    latitude = models.DecimalField(max_digits=25, decimal_places=15)  # Latitude (e.g., 35.470540)
+    longitude = models.DecimalField(max_digits=25, decimal_places=15)  # Longitude (e.g., 50.983306)
     
     plmn_id = models.IntegerField()  # PLMN Id
     lac = models.IntegerField(null=True, blank=True)  # LAC (nullable)
     rac = models.IntegerField(null=True, blank=True)  # RAC (nullable)
-    tac = models.IntegerField()  # TAC
-    cell_id = models.IntegerField()  # Cell ID
-    band = models.CharField(max_length=10)  # Band (e.g., "2147483647")
-    arfcn = models.IntegerField()  # ARFCN (Absolute Radio Frequency Channel Number)
+    tac = models.IntegerField(null=True, blank=True)  # TAC
+    cell_id = models.IntegerField(null=True, blank=True)  # Cell ID
+    band = models.CharField(max_length=10,null=True, blank=True)  # Band (e.g., "2147483647")
+    arfcn = models.IntegerField(null=True, blank=True)  # ARFCN (Absolute Radio Frequency Channel Number)
 
     # Signal details (Signal Strengths)
-    rsrp = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # RSRP (e.g., -108)
-    rsrq = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # RSRQ (e.g., -12)
-    rssi = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # RSSI (e.g., -77)
-    rscp = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # RSCP (nullable)
-    ec_no = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Ec/No (nullable)
-    rx_lev = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # RxLev (nullable)
-    power = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    quality = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rsrp = models.DecimalField(max_digits=25, decimal_places=2, null=True, blank=True)  # RSRP (e.g., -108)
+    rsrq = models.DecimalField(max_digits=25, decimal_places=2, null=True, blank=True)  # RSRQ (e.g., -12)
+    rssi = models.DecimalField(max_digits=25, decimal_places=2, null=True, blank=True)  # RSSI (e.g., -77)
+    rscp = models.DecimalField(max_digits=25, decimal_places=2, null=True, blank=True)  # RSCP (nullable)
+    ec_no = models.DecimalField(max_digits=25, decimal_places=2, null=True, blank=True)  # Ec/No (nullable)
+    rx_lev = models.DecimalField(max_digits=25, decimal_places=2, null=True, blank=True)  # RxLev (nullable)
+    power = models.DecimalField(max_digits=25, decimal_places=2, null=True, blank=True)
+    quality = models.DecimalField(max_digits=25, decimal_places=2, null=True, blank=True)
     
     # Scan information
     network_type = models.CharField(max_length=20)  # Scan Tech (e.g., "LTE (4G)")
