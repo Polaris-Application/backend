@@ -7,6 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.db.models.functions import TruncMinute
 from django.db.models import Max
+from mobile_facilities.models import UserLocationData
+from authentication.models import User
 
 class UserMobileTestsView(views.APIView):
     permission_classes = [IsAuthenticated]
@@ -34,9 +36,41 @@ class UserMobileTestsView(views.APIView):
             serializer = UserMobileTestSerializer(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
+            if name == "down" or "up": 
+                queryset = queryset.filter(name__icontains=name).order_by('timestamp')
+                serializer = UserMobileTestSerializer(queryset, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             distinct_domains = queryset.values_list('test_domain', flat=True).distinct()
             domains_string = ",".join(distinct_domains)
             return Response(domains_string, status=status.HTTP_200_OK)
+
+
+
+class EventCountApiView(APIView): 
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        try:
+            cell_info_queryset = UserLocationData.objects.order_by('-timestamp')
+            if user.role == "admin" : 
+                user_count = User.objects.count()
+                cell_info_count = UserLocationData.objects.count()
+                return Response( {"user_count": user_count, 
+                                  "cell_info_count": cell_info_count}, status=200)
+            elif user.role == "plmn_admin": 
+                temp = cell_info_queryset.filter(plmn_id=user.plmn)
+                cell_info_count = temp.count()
+                user_count = temp.values_list("user", flat=True).distinct().count()
+                return Response( {"user_count": user_count, 
+                                  "cell_info_count": cell_info_count}, status=200)
+            elif user.role == "user": 
+                cell_info_count = cell_info_queryset.filter(user=user).count()
+                user_test_count = UserMobileTests.objects.filter(user=user).count()
+                return Response( {"user_test_count": user_test_count, 
+                                  "cell_info_count": cell_info_count}, status=200)
+        except UserLocationData.DoesNotExist:
+            return Response({"message": "User location data does not exist."}, status=404)  
 
 
 class MaxPingOverTimeView(APIView):
@@ -51,7 +85,7 @@ class MaxPingOverTimeView(APIView):
 
         queryset = (
             UserMobileTests.objects
-            .filter(user=user, test_type='ping')
+            .filter(user=user, name='ping')
             .annotate(time_bin=trunc_func)
             .values('time_bin')
             .annotate(max_delay=Max('result'))
