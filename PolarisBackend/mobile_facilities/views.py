@@ -19,7 +19,7 @@ class UserLocationDataCreateView(views.APIView):
             user = request.user  
             serializer.save(user=user) 
             return Response({'status': 'Data Created'}, status=201)
-        print(f"++++++++++++++++++++++++++++++++++++++++ {serializer.errors}" )
+       
         return Response(serializer.errors , status=400)
     
     def get(self, request):
@@ -27,7 +27,7 @@ class UserLocationDataCreateView(views.APIView):
         try:
             latest_location_data = UserLocationData.objects.order_by('-timestamp').first()
             if user.role == "plmn_admin": 
-                latest_location_data = latest_location_data.filter(plmn=user.plmn)
+                latest_location_data = latest_location_data.filter(plmn_id=user.plmn)
             elif user.role == "user": 
                 latest_location_data = latest_location_data.filter(user=user)
 
@@ -44,14 +44,46 @@ class SignalScatterDataView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        user = request.user
+        latest_location_data = UserLocationData.objects.order_by('-timestamp')
+        if user.role == "plmn_admin": 
+            latest_location_data = latest_location_data.filter(plmn_id=user.plmn)
+        elif user.role == "user": 
+            latest_location_data = latest_location_data.filter(user=user)
+
         queryset = UserLocationData.objects.filter(
-            user=request.user,
             rsrp__isnull=False,
             rsrq__isnull=False
         ).values('rsrp', 'rsrq')  
 
         return Response(list(queryset), status=200)
     
+
+class HistogramDataView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        # RSRP / RSSI / RSRQ
+        rsrp = request.query_params.get("rsrp")
+        rsrq = request.query_params.get("rsrq")
+        rssi = request.query_params.get("rssi")
+        user = request.user
+        latest_location_data = UserLocationData.objects.order_by('-timestamp')
+        if user.role == "plmn_admin": 
+            latest_location_data = latest_location_data.filter(plmn_id=user.plmn)
+        elif user.role == "user": 
+            latest_location_data = latest_location_data.filter(user=user)
+        if rsrp : 
+            queryset = UserLocationData.objects.filter( rsrp__isnull=False).values_list('rsrp', flat=True)
+            return Response(list(queryset), status=200)
+        if rsrq : 
+            queryset = UserLocationData.objects.filter( rsrp__isnull=False).values_list('rsrq', flat=True)
+            return Response(list(queryset), status=200)
+        if rssi : 
+            queryset = UserLocationData.objects.filter( rsrp__isnull=False).values_list('rssi', flat=True)
+            return Response(list(queryset), status=200)
+        return Response({"message": "no parameter were provided!"}, status=400)
+    
+
 class UserLocationDataListView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
@@ -88,7 +120,7 @@ class NetworkTypeUsagePieView(APIView):
         end = request.query_params.get('end')
         queryset = UserLocationData.objects
         if user.role == "plmn_admin": 
-            queryset = queryset.filter(plmn=user.plmn)
+            queryset = queryset.filter(plmn_id=user.plmn)
         elif user.role == "user": 
             queryset = queryset.filter(user=user)
 
@@ -117,7 +149,7 @@ class RSRPOverTimeView(APIView):
 
         queryset = UserLocationData.objects.filter( rsrp__isnull=False)
         if user.role == "plmn_admin": 
-            queryset = queryset.filter(plmn=user.plmn)
+            queryset = queryset.filter(plmn_id=user.plmn)
         elif user.role == "user": 
             queryset = queryset.filter(user=user)
        
@@ -145,7 +177,7 @@ class ARFCNUsagePieView(APIView):
             )
         queryset = UserLocationData.objects
         if user.role == "plmn_admin": 
-            queryset = queryset.filter(plmn=user.plmn)
+            queryset = queryset.filter(plmn_id=user.plmn)
         elif user.role == "user": 
             queryset = queryset.filter(user=user)
             

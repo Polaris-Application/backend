@@ -65,14 +65,23 @@ class LoginSerializer(serializers.Serializer):
             return attrs
         else:
             raise serializers.ValidationError("Must include 'phone_number' and 'password'.")
-
+        
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["phone_number", "id" , "role"] 
+        fields = ["phone_number", "id", "role"]  # Base fields for all users
+
+    def to_representation(self, instance):
+        # Get the default serialized data
+        data = super().to_representation(instance)
+        if instance.role == 'plmn_admin':
+            data['plmn'] = instance.plmn  
+        
+        return data
+
     def validate(self, attrs):
         return super().validate(attrs)
-
+    
 # from rest_framework import serializers
 # from django.contrib.auth import get_user_model
 

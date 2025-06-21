@@ -72,22 +72,14 @@ class RetrieveUserData(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
     def get(self, request):
-        phone_number = request.query_params.get("phone_number")
-        if not phone_number:
-            return Response(
-                {"message": "phone_number is required in query parameters."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        user = self.get_user_by_phone_number(phone_number)
-
+        user = request.user 
         if user is None:
             return Response(
                 {"message": "User not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-
         data = {"user": UserSerializer(user).data}
+        
         return Response(data=data, status=status.HTTP_200_OK)
     
     def get_user_by_phone_number(self, phone_number: str):

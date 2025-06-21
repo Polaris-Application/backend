@@ -13,8 +13,8 @@ class UserLocationData(models.Model):
     rac = models.IntegerField(null=True, blank=True)  # RAC (nullable)
     tac = models.IntegerField(null=True, blank=True)  # TAC
     cell_id = models.IntegerField(null=True, blank=True)  # Cell ID
-    band = models.CharField(max_length=10,null=True, blank=True)  # Band (e.g., "2147483647")
-    arfcn = models.IntegerField(null=True, blank=True)  # ARFCN (Absolute Radio Frequency Channel Number)
+    band = models.CharField(max_length=10,null=True, blank=True) 
+    arfcn = models.IntegerField(null=True, blank=True)  
 
     # Signal details (Signal Strengths)
     rsrp = models.DecimalField(max_digits=25, decimal_places=2, null=True, blank=True)  # RSRP (e.g., -108)
