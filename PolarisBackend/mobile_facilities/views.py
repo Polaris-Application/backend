@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.db.models import Count
 from django.utils.dateparse import parse_datetime
-
+from datetime import datetime
 
 class UserLocationDataCreateView(views.APIView):
     permission_classes = [IsAuthenticated]
@@ -141,28 +141,104 @@ class NetworkTypeUsagePieView(APIView):
 class RSRPOverTimeView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get_grouped_rsrp_data(self, queryset, scale):
+        grouped_data = {}
+        for item in queryset:
+            ts = item['timestamp']
+            rsrp = item['rsrp']
+
+            if scale == '1h':
+                key = ts.strftime('%Y-%m-%d %H:00')
+            elif scale == '1d':
+                key = ts.strftime('%Y-%m-%d')
+            elif scale == '1w':
+                # iso_year, iso_week, _ = ts.isocalendar()
+                year = ts.year
+                month = ts.month
+                first_day_of_month = datetime(year, month, 1)
+                week_num_in_month = ((ts.day + first_day_of_month.weekday()) - 1) // 7 + 1
+                key = f"{year}-{month:02d}-w{week_num_in_month}"
+                # key = f"{iso_year}-w{iso_week}"
+            elif scale == '1m':
+                key = ts.strftime('%Y-%m')
+            else:
+                key = ts.isoformat()
+
+            if key not in grouped_data:
+                grouped_data[key] = {'rsrp_sum': 0, 'count': 0}
+
+            grouped_data[key]['rsrp_sum'] += rsrp
+            grouped_data[key]['count'] += 1
+
+        result = []
+        for key, value in grouped_data.items():
+            avg_rsrp = value['rsrp_sum'] / value['count']
+            result.append({
+                'timestamp': key,
+                'rsrp': avg_rsrp
+            })
+        result.sort(key=lambda x: x['timestamp'])
+        return result
+
     def get(self, request):
         user = request.user
         cell_id = request.query_params.get('cell_id')
-        start = request.query_params.get('start')  # e.g., 2025-06-01T00:00:00
+        start = request.query_params.get('start')
         end = request.query_params.get('end')
+        scale = request.query_params.get('scale')
 
-        queryset = UserLocationData.objects.filter( rsrp__isnull=False)
-        if user.role == "plmn_admin": 
+        queryset = UserLocationData.objects.filter(rsrp__isnull=False)
+        
+        if user.role == "plmn_admin":
             queryset = queryset.filter(plmn_id=user.plmn)
-        elif user.role == "user": 
+        elif user.role == "user":
             queryset = queryset.filter(user=user)
-       
+
         if cell_id:
             queryset = queryset.filter(cell_id=cell_id)
-
         if start:
-            queryset = queryset.filter(timestamp__gte=parse_datetime(start))
+            start_dt = parse_datetime(start)
+            if start_dt:
+                queryset = queryset.filter(timestamp__gte=start_dt)
+
         if end:
-            queryset = queryset.filter(timestamp__lte=parse_datetime(end))
+            end_dt = parse_datetime(end)
+            if end_dt:
+                queryset = queryset.filter(timestamp__lte=end_dt)
 
         queryset = queryset.order_by('timestamp').values('timestamp', 'rsrp')
-        return Response(list(queryset), status=200)
+        if scale : #start and end
+            data = self.get_grouped_rsrp_data(queryset, scale)
+        else:
+            data = list(queryset)
+        return Response(data, status=200)
+
+
+# class RSRPOverTimeView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         user = request.user
+#         cell_id = request.query_params.get('cell_id')
+#         start = request.query_params.get('start')  # e.g., 2025-06-01T00:00:00
+#         end = request.query_params.get('end')
+
+#         queryset = UserLocationData.objects.filter( rsrp__isnull=False)
+#         if user.role == "plmn_admin": 
+#             queryset = queryset.filter(plmn_id=user.plmn)
+#         elif user.role == "user": 
+#             queryset = queryset.filter(user=user)
+       
+#         if cell_id:
+#             queryset = queryset.filter(cell_id=cell_id)
+
+#         if start:
+#             queryset = queryset.filter(timestamp__gte=parse_datetime(start))
+#         if end:
+#             queryset = queryset.filter(timestamp__lte=parse_datetime(end))
+
+#         queryset = queryset.order_by('timestamp').values('timestamp', 'rsrp')
+#         return Response(list(queryset), status=200)
 
 class ARFCNUsagePieView(APIView):
     permission_classes = [IsAuthenticated]
