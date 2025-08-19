@@ -1,6 +1,7 @@
 from django.db import models
 from authentication.models import User # Assuming User model is from django.contrib.auth
 
+
 class UserLocationData(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="location_data")  
     # Location details

@@ -95,7 +95,7 @@ class UserLocationDataListView(APIView):
 
         queryset = UserLocationData.objects
         if request.user.role == "plmn_admin": 
-            queryset = queryset.filter(plmn=request.user.plmn)
+            queryset = queryset.filter(plmn_id=request.user.plmn)
         elif request.user.role == "user": 
             queryset = queryset.filter(user=request.user)
 
@@ -103,11 +103,12 @@ class UserLocationDataListView(APIView):
             queryset = queryset.filter(power__gte=min_power)
         if max_power:
             queryset = queryset.filter(power__lte=max_power)
-        queryset = UserLocationData.objects.filter(user=request.user)
+        # queryset = UserLocationData.objects.filter(user=request.user)
         if min_quality:
             queryset = queryset.filter(quality__gte=min_quality)
         if max_quality:
             queryset = queryset.filter(quality__lte=max_quality)
+        
         serializer = UserLocationDataGetSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
