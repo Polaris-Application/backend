@@ -17,6 +17,15 @@ class UserLocationDataCreateView(views.APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = request.user  
+            if user.role != "user" : 
+                return Response({'message': 'only users can post location data.'}, status=400)
+            plmn = serializer.validated_data.get("plmn_id")
+            if user.plmn == None: 
+                user.plmn = serializer.validated_data.get("plmn_id")
+                user.save()
+            elif user.plmn2 == None and plmn != user.plmn : 
+                user.plmn2 = serializer.validated_data.get("plmn_id")
+                user.save()
             serializer.save(user=user) 
             return Response({'status': 'Data Created'}, status=201)
        

@@ -37,12 +37,10 @@ class UserMobileTestsView(views.APIView):
             end_dt = parse_datetime(end)
             if end_dt:
                 queryset = queryset.filter(timestamp__lte=end_dt)
-
         grouped_data = {}
         for item in queryset:
             ts = item.timestamp
             result = item.result
-
             if scale == '1h':
                 key = ts.strftime('%Y-%m-%d %H:00')
             elif scale == '1d':
@@ -81,10 +79,13 @@ class UserMobileTestsView(views.APIView):
         start = request.query_params.get('start')
         end = request.query_params.get('end')
         scale = request.query_params.get('scale')
-
         domain = request.query_params.get('domain')
         name = request.query_params.get('name')
-        queryset = UserMobileTests.objects.filter(user=request.user)
+        queryset = UserMobileTests.objects
+        
+        if request.user.role == "user": 
+            queryset = queryset.filter(user=request.user)
+
         if (not name) and ( not domain): 
             queryset = queryset.order_by('timestamp')
             serializer = UserMobileTestSerializer(queryset, many=True)
@@ -104,10 +105,15 @@ class UserMobileTestsView(views.APIView):
                     result = self.get_grouped_result_data(queryset=queryset, start=start,end=end, scale=scale, name=name, domain='')
                     return Response(result, status=status.HTTP_200_OK)
                 serializer = UserMobileTestSerializer(queryset, many=True)
+                print("000000000000000000000000000000000000")
+                print(f"-----***********************---------name : {name} scale : {scale} ------  {len(queryset)}")
+                print(serializer.data)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             queryset = queryset.filter(name__icontains=name)
+           
             distinct_domains = queryset.values_list('test_domain', flat=True).distinct()
-            domains_string = ",".join(distinct_domains)
+            domains_string = ",".join(str(d) for d in distinct_domains if d is not None)
+            print("Domains string:  ", domains_string , " name : ", name)
             return Response(domains_string, status=status.HTTP_200_OK)
         
 
@@ -116,7 +122,6 @@ class EventCountApiView(APIView):
 
     def get(self, request):
         user = request.user
-
         try:
             cell_info_queryset = UserLocationData.objects.order_by('-timestamp')
             if user.role == "admin" : 

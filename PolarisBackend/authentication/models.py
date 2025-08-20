@@ -75,6 +75,7 @@ class User(AbstractBaseUser):
         unique=True,
     )
     plmn = models.IntegerField(null=True, blank=True)
+    plmn2 = models.IntegerField(null=True, blank=True)
     role = models.CharField( max_length=255, choices=CHOICES , default=TYPE_USER )
     is_staff = models.BooleanField(default=False)  
     is_superuser = models.BooleanField(default=False)  
